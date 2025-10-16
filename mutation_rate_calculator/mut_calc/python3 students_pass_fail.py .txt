@@ -1,0 +1,31 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Create the DataFrame
+data = {
+    'Name': ['Alice', 'Bob', 'Charlie', 'Diana', 'Ethan'],
+    'Age': [25, 30, 35, 40, 45],
+    'Score': [88, 92, 85, 90, 87]
+}
+df = pd.DataFrame(data)
+
+# Add a Result column (Pass if Score >= 90)
+df['Result'] = df['Score'].apply(lambda x: 'Pass' if x >= 90 else 'Fail')
+
+# Print the full DataFrame
+print("Full DataFrame:")
+print(df)
+print()
+
+# Count how many students passed vs failed
+counts = df['Result'].value_counts()
+print("Pass/Fail counts:")
+print(counts)
+print()
+
+# Create a bar plot
+plt.bar(counts.index, counts.values, color=['green', 'red'])
+plt.title('Number of Students: Pass vs Fail')
+plt.xlabel('Result')
+plt.ylabel('Number of Students')
+plt.show()
