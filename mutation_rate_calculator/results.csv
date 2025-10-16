@@ -1,0 +1,4 @@
+id,length,compared_sites,mismatches,mutation_rate
+Seq1,29,27,0,0.0
+Seq2,29,26,1,0.038462
+Seq3,29,25,1,0.04
