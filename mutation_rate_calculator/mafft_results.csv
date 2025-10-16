@@ -1,0 +1,4 @@
+id,length,compared_sites,mismatches,mutation_rate
+CB307934.1,1445,673,0,0.0
+HE983605.1,1445,639,336,0.525822
+LT934502.1,1445,650,372,0.572308

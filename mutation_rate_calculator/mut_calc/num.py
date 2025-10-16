@@ -12,53 +12,67 @@ import numpy as np
 from typing import Tuple
 
 
-def parse_fa(fasta_str: str) -> Tuple[str, str, np.ndarray, np.ndarray, np.ndarray]:
+#!/usr/bin/env python3
+"""
+num.py — Parsing utilities for Mutation Rate Calculator.
+Handles aligned FASTA parsing for 2 or more sequences.
+"""
+
+import re
+from typing import List, Tuple
+
+def parse_fa(fasta_str: str) -> Tuple[List[str], List[List[str]]]:
     """
-    Parse a formatted FASTA string into two headers, two sequences, 
-    and an initialized alignment matrix.
+    Parse a formatted FASTA string into lists of headers and sequences.
+    Supports any number of aligned sequences (2 or more).
 
     Parameters
     ----------
     fasta_str : str
-        Formatted FASTA string where each sequence entry is represented as:
-        ID\nSEQUENCE\nID\nSEQUENCE
+        A formatted FASTA string returned by read_fa().
 
     Returns
     -------
-    Tuple[str, str, np.ndarray, np.ndarray, np.ndarray]
-        - Header for first sequence
-        - Header for second sequence
-        - First sequence as a NumPy array of characters
-        - Second sequence as a NumPy array of characters
-        - A zero-initialized matrix of shape (len(seq2)+1, len(seq1)+1)
+    Tuple[List[str], List[List[str]]]
+        headers   : list of sequence IDs (strings)
+        sequences : list of sequences, each split into a list of characters
 
-    Notes
-    -----
-    The matrix will have:
-        - Columns = len(sequence 1) + 1
-        - Rows    = len(sequence 2) + 1
+    Example
+    -------
+    Input FASTA:
+        >Seq1
+        ATGC
+        >Seq2
+        AT-T
+        >Seq3
+        ATGG
+
+    Returns:
+        headers   = ['Seq1', 'Seq2', 'Seq3']
+        sequences = [['A','T','G','C'], ['A','T','-','T'], ['A','T','G','G']]
     """
-    # Split the formatted FASTA string into lines
-    lines = fasta_str.strip().splitlines()
 
-    if len(lines) < 4:
-        raise ValueError("Formatted FASTA must contain two sequences (4 lines).")
+    # Find all FASTA entries (header + sequence)
+    entries = re.findall(r">(.*?)\n([^>]*)", fasta_str, flags=re.DOTALL)
 
-    header1 = lines[0][1:].strip()
-    seq1 = lines[1].strip()
-    header2 = lines[2][1:].strip()
-    seq2 = lines[3].strip()
+    headers: List[str] = []
+    sequences: List[List[str]] = []
 
-    # Convert to NumPy arrays of characters
-    seq1_array = np.array(list(seq1))
-    seq2_array = np.array(list(seq2))
+    for header, seq in entries:
+        # Take only the first token as ID (before any spaces)
+        seq_id_match = re.match(r"^(\S+)", header.strip())
+        seq_id = seq_id_match.group(1) if seq_id_match else "UNKNOWN"
 
-    # Initialize matrix of zeros with correct dimensions
-    rows = len(seq2) + 1
-    cols = len(seq1) + 1
-    matrix = np.zeros((rows, cols), dtype=int)
+        # Clean sequence (remove whitespace, uppercase)
+        cleaned_seq = re.sub(r"\s+", "", seq).upper()
 
-    return header1, header2, seq1_array, seq2_array, matrix
+        headers.append(seq_id)
+        sequences.append(list(cleaned_seq))
+
+    if not headers or not sequences:
+        raise ValueError("No valid FASTA entries found.")
+
+    return headers, sequences
 
 def fill_matrix(
     matrix: np.ndarray,
